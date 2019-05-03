@@ -32,7 +32,7 @@ namespace ClinkedIn2.Controllers
 
         // Get Single User
         [HttpGet("{id}")]
-        public ActionResult GetSingleUser(string id)
+        public ActionResult GetSingleUser(int id)
         {
             return Ok(_userRepository.GetSingleUser(id));
         }
@@ -54,7 +54,8 @@ namespace ClinkedIn2.Controllers
         [HttpDelete("{id}")]
         public ActionResult DeleteUser(int Id)
         {
-            return Ok(_userRepository.DeleteUser(Id));
+            _userRepository.DeleteUser(Id);
+            return Ok();
         }
 
         // Get Update User IsPrisoner
@@ -68,7 +69,7 @@ namespace ClinkedIn2.Controllers
 
         // Add Friend to User
         [HttpPut("{userId}/addFriend/{friendId}")]
-        public ActionResult AddFriend(string userId, string friendId)
+        public ActionResult AddFriend(int userId, int friendId)
         {
             var users = _userRepository.GetAllUsers();
             var user = users.FirstOrDefault(u => u.Id == userId);
@@ -92,7 +93,7 @@ namespace ClinkedIn2.Controllers
 
         // Remove Friend from User
         [HttpPut("{userId}/removeFriend/{friendId}")]
-        public ActionResult RemoveFriend(string userId, string friendId)
+        public ActionResult RemoveFriend(int userId, int friendId)
         {
             var users = _userRepository.GetAllUsers();
             var user = users.FirstOrDefault(u => u.Id == userId);
@@ -111,7 +112,7 @@ namespace ClinkedIn2.Controllers
 
         // GET User's Friends
         [HttpGet("{userId}/friends")]
-        public ActionResult GetFriends(string userId)
+        public ActionResult GetFriends(int userId)
         {
             var user = _userRepository.GetSingleUser(userId);
             if (user.Friends.Count == 0) return BadRequest(new { error = $"{user.Username} doesnt have any friends" });
@@ -122,7 +123,7 @@ namespace ClinkedIn2.Controllers
 
         // GET User's Friends of Friends
         [HttpGet("{userId}/friends/friendsOfFriends")]
-        public ActionResult GetFriendsOfFriends(string userId)
+        public ActionResult GetFriendsOfFriends(int userId)
         {
             var user = _userRepository.GetSingleUser(userId);
             if (user.Friends.Count == 0) return BadRequest(new { error = $"{user.Username} doesnt have any friends" });

@@ -5,20 +5,20 @@ namespace ClinkedIn2.Models
 {
     public class User
     {
-        public User(string username, string password, DateTime releaseDate, int age, bool isPrisoner)
-        {
-            Id = Guid.NewGuid().ToString();
-            Username = username;
-            Password = password;
-            ReleaseDate = releaseDate;
-            Friends = new List<User>();
-            Enemies = new List<User>();
-            IsWarden = false;
-            IsPrisoner = isPrisoner;
-            Age = age;
-        }
+        //public User(string username, string password, DateTime releaseDate, int age, bool isPrisoner)
+        //{
+        //    Id = Guid.NewGuid().ToString();
+        //    Username = username;
+        //    Password = password;
+        //    ReleaseDate = releaseDate;
+        //    Friends = new List<User>();
+        //    Enemies = new List<User>();
+        //    IsWarden = false;
+        //    IsPrisoner = isPrisoner;
+        //    Age = age;
+        //}
 
-        public string Id { get; set; }
+        public int Id { get; set; }
         public string Username { get; set; }
         public string Password { get; set; }
         public bool IsPrisoner { get; set; }

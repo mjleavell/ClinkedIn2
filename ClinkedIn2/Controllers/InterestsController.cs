@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using ClinkedIn.Data;
-using ClinkedIn.Validators;
-using Microsoft.AspNetCore.Http;
+﻿using ClinkedIn2.Data;
+using ClinkedIn2.Validators;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ClinkedIn2.Controllers
@@ -27,14 +22,14 @@ namespace ClinkedIn2.Controllers
         // -------------------------------- Interests --------------------------------
 
         [HttpGet]
-        public ActionResult GetAllInterests()
+        public ActionResult GetAllInterests(int userId)
         {
-            var userInterestList = _userRepository.GetSingleUser(id).Interests;
+            var userInterestList = _userRepository.GetSingleUser(userId).Interests;
             return Ok(userInterestList);
         }
 
         [HttpPut("{id}/interest/add")]
-        public ActionResult AddInterest(string id, string interest)
+        public ActionResult AddInterest(int id, string interest)
         {
 
             var userInterestList = _userRepository.GetSingleUser(id).Interests;
