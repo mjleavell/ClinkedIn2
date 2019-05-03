@@ -85,61 +85,18 @@ namespace ClinkedIn2.Data
 
                 return users;
             }
-                //var users = new List<User>(); 
-                //var connection = new SqlConnection(ConnectionString);
-                //connection.Open();
-
-                //var getAllUsersCommand = connection.CreateCommand(); 
-                //getAllUsersCommand.CommandText = "select * from users";
-
-                //var reader = getAllUsersCommand.ExecuteReader(); 
-
-                //while (reader.Read())
-                //{
-                //    var id = reader["Id"].ToString(); 
-                //    var username = reader["username"].ToString();
-                //    var password = reader["password"].ToString();
-                //    var releaseDate = (DateTime)reader["releaseDate"];
-                //    var age = (int)reader["age"];
-                //    var isPrisoner = (bool)reader["isPrisoner"];
-                //    var user = new User(username, password, releaseDate, age, isPrisoner) { Id = id };
-
-                //    users.Add(user);
-                //}
-
-                //connection.Close();
-
-                //return users;
-            }
+        }
 
         public User GetSingleUser(int userId)
         {
-            using (var connection = new SqlConnection(ConnectionString))
+            using (var db = new SqlConnection(ConnectionString))
             {
-                connection.Open();
+                var singleQuery = @"SELECT *
+                                    FROM users
+                                    WHERE id = @userId";
 
-                var getSingleUserCommand = connection.CreateCommand();
-                getSingleUserCommand.CommandText = @"SELECT *
-                                                    FROM users u
-                                                    WHERE u.id = @userId";
+                var singleUser = db.QuerySingleOrDefault<User>(singleQuery);
 
-                getSingleUserCommand.Parameters.AddWithValue("@userId", userId);
-                var reader = getSingleUserCommand.ExecuteReader();
-
-                // if no users were returned, an error is thrown.
-                if (!reader.Read())
-                {
-                    throw new InvalidOperationException("No user were returned.");
-                }
-
-                var singleUserId = reader["id"];
-                var singleUserUsername = reader["username"].ToString();
-                var singleUserPassword = reader["password"].ToString();
-                var singleUserReleaseDate = (DateTime)reader["releaseDate"];
-                var singleUserAge = (int)reader["age"];
-                var singleUserIsPrisoner = (bool)reader["isPrisoner"];
-
-                var singleUser = new User();
                 return singleUser;
             }
             throw new Exception("No user found");
@@ -160,21 +117,19 @@ namespace ClinkedIn2.Data
                 isPrisoner = true;
             }
 
-            using (var connection = new SqlConnection(ConnectionString))
+            using (var db = new SqlConnection(ConnectionString))
             {
-                connection.Open();
-                var updateUserCommand = connection.CreateCommand();
-                updateUserCommand.CommandText = $@"Update Users
-                                                Set IsPrisoner = @isPrisoner
-                                                where id = @id";
+                var updateQuery = @"UPDATE Users
+                                    SET IsPrisoner = @isPrisoner
+                                    WHERE id = @id";
 
-                updateUserCommand.Parameters.AddWithValue("@id", id);
-                updateUserCommand.Parameters.AddWithValue("@isPrisoner", isPrisoner);
-                var reader = updateUserCommand.ExecuteReader();
-                return isPrisoner;
+                var rowsAffected = db.Execute(updateQuery, isPrisoner);
+
+                if (rowsAffected == 1)
+                    return isPrisoner;
             }
 
-            throw new Exception("No user found");
+            throw new Exception("Could not update isPrisoner for the user");
         }
 
         public void DeleteUser(int userId)

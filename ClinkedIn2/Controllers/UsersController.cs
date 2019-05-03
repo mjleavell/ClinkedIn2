@@ -61,8 +61,9 @@ namespace ClinkedIn2.Controllers
         // Get Update User IsPrisoner
         [HttpPut("{id}")]
         public ActionResult UpdateIsPrisoner(int id)
-        {            
-            return Ok(_userRepository.UpdateIsPrisoner(id));
+        {
+            var newIsPrisoner = _userRepository.UpdateIsPrisoner(id);
+            return Ok(newIsPrisoner);
         }
 
         // -------------------------------- Friends --------------------------------
