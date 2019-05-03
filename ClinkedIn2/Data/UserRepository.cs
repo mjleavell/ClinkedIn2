@@ -34,35 +34,40 @@ namespace ClinkedIn2.Data
             return listOfIntrest;
         }
 
-        public User AddUser(string username, string password, DateTime releaseDate, int age, bool isPrisoner)
+        public User AddUser(string username, string password, DateTime releaseDate, int age)
         {
-            using (var connection = new SqlConnection(ConnectionString))
+            using (var db = new SqlConnection(ConnectionString))
             {
-                connection.Open();
-                var insertUserCommand = connection.CreateCommand();
-                insertUserCommand.CommandText = $@"Insert into Users (username,password, releaseDate, age, isPrisoner)
-                                            Output inserted.*
-                                            Values(@username,@password,@releaseDate,@age,@isPrisoner)";
+                var repository = new UserRepository();
 
-                insertUserCommand.Parameters.AddWithValue("username", username);
-                insertUserCommand.Parameters.AddWithValue("password", password);
-                insertUserCommand.Parameters.AddWithValue("releaseDate", releaseDate);
-                insertUserCommand.Parameters.AddWithValue("age", age);
-                insertUserCommand.Parameters.AddWithValue("isPrisoner", isPrisoner);
+                var insertQuery = @"
+                        INSERT INTO [dbo].[Users]
+                                   ([Username]
+                                   ,[Password]
+                                   ,[ReleaseDate]
+                                   ,[Age]
+                                   ,[IsPrisoner])
+                        OUTPUT inserted.*
+                             VALUES
+                                   (@username
+		                           ,@password
+		                           ,@releaseDate
+                                   ,@age
+                                   ,@isPrisoner)";
 
-                var reader = insertUserCommand.ExecuteReader();
-
-                if (reader.Read())
+                var parameters = new
                 {
-                    var insertedPassword = reader["password"].ToString();
-                    var insertedUsername = reader["username"].ToString();
-                    var insertedReleaseDate = (DateTime)reader["releaseDate"];
-                    var insertedAge = (int)reader["age"];
-                    var insertedId = reader["Id"].ToString();
-                    var insertedIsPrisoner = (bool)reader["isPrisoner"];
+                    Username = username,
+                    Password = password,
+                    ReleaseDate = releaseDate,
+                    Age = age,
+                    IsPrisoner = true
+                };
 
-                    var newUser = new User(insertedUsername, insertedPassword, insertedReleaseDate, insertedAge, insertedIsPrisoner) { Id = insertedId };
+                var newUser = db.QueryFirstOrDefault<User>(insertQuery, parameters);
 
+                if (newUser != null)
+                {
                     return newUser;
                 }
             }
@@ -134,7 +139,7 @@ namespace ClinkedIn2.Data
                 var singleUserAge = (int)reader["age"];
                 var singleUserIsPrisoner = (bool)reader["isPrisoner"];
 
-                var singleUser = new User(singleUserUsername, singleUserPassword, singleUserReleaseDate, singleUserAge, singleUserIsPrisoner) { Id = singleUserId };
+                var singleUser = new User();
                 return singleUser;
             }
             throw new Exception("No user found");
