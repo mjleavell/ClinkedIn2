@@ -89,13 +89,51 @@ namespace ClinkedIn2.Data
 
         public User GetSingleUser(int userId)
         {
-            using (var db = new SqlConnection(ConnectionString))
-            {
-                var singleQuery = @"SELECT *
-                                    FROM users
-                                    WHERE id = @userId";
+            //using (var db = new SqlConnection(ConnectionString))
+            //{
+            //    var singleQuery = @"SELECT *5
+            //                        FROM users
+            //                        WHERE id = @userId";
 
-                var singleUser = db.QuerySingleOrDefault<User>(singleQuery);
+            //    var singleUser = db.QueryFirstOrDefault<User>(singleQuery);
+
+            //    return singleUser;
+            //}
+            //throw new Exception("No user found");
+            using (var connection = new SqlConnection(ConnectionString))
+            {
+                connection.Open();
+
+                var getSingleUserCommand = connection.CreateCommand();
+                getSingleUserCommand.CommandText = @"SELECT *
+                                                    FROM users u
+                                                    WHERE u.id = @userId";
+
+                getSingleUserCommand.Parameters.AddWithValue("@userId", userId);
+                var reader = getSingleUserCommand.ExecuteReader();
+
+                // if no users were returned, an error is thrown.
+                if (!reader.Read())
+                {
+                    throw new InvalidOperationException("No user were returned.");
+                }
+
+                var singleUserId = (int)reader["id"];
+                var singleUserUsername = reader["username"].ToString();
+                var singleUserPassword = reader["password"].ToString();
+                var singleUserReleaseDate = (DateTime)reader["releaseDate"];
+                var singleUserAge = (int)reader["age"];
+                var singleUserIsPrisoner = (bool)reader["isPrisoner"];
+
+                var singleUser = new User()
+                {
+                    Id = singleUserId,
+                    Username = singleUserUsername,
+                    Password = singleUserPassword,
+                    ReleaseDate = singleUserReleaseDate,
+                    Age = singleUserAge,
+                    IsPrisoner = singleUserIsPrisoner
+                };
 
                 return singleUser;
             }
@@ -123,7 +161,7 @@ namespace ClinkedIn2.Data
                                     SET IsPrisoner = @isPrisoner
                                     WHERE id = @id";
 
-                var rowsAffected = db.Execute(updateQuery, isPrisoner);
+                var rowsAffected = db.ExecuteNonQuery(updateQuery, isPrisoner);
 
                 if (rowsAffected == 1)
                     return isPrisoner;
