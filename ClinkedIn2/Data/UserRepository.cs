@@ -140,9 +140,9 @@ namespace ClinkedIn2.Data
             throw new Exception("No user found");
         }
 
-        public bool UpdateIsPrisoner(int id)
+        public bool UpdateIsPrisoner(int userId)
         {
-            var user = GetSingleUser(id);
+            var user = GetSingleUser(userId);
             var isPrisoner= user.IsPrisoner;
 
             // if isPrisoner is true
@@ -159,12 +159,14 @@ namespace ClinkedIn2.Data
             {
                 var updateQuery = @"UPDATE Users
                                     SET IsPrisoner = @isPrisoner
-                                    WHERE id = @id";
+                                    WHERE id = @userId";
 
-                var rowsAffected = db.ExecuteNonQuery(updateQuery, isPrisoner);
+                var rowsAffected = db.Execute(updateQuery, isPrisoner);
 
                 if (rowsAffected == 1)
+                {
                     return isPrisoner;
+                }
             }
 
             throw new Exception("Could not update isPrisoner for the user");
