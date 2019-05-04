@@ -11,73 +11,50 @@ namespace ClinkedIn2.Data
     {
         const string ConnectionString = "Server = localhost; Database = ClinkedIn; Trusted_Connection = True;";
 
-        public Services AddService(string name, string description, decimal price)
+        public Service AddService(string name, string description, decimal price)
         {
-
-            using (var connection = new SqlConnection(ConnectionString))
+            using (var db = new SqlConnection(ConnectionString))
             {
-                connection.Open();
-                var insertUserCommand = connection.CreateCommand();
-                insertUserCommand.CommandText = $@"Insert into Services (name,description,price)
-                                            Output inserted.*
-                                            Values(@name,@description,@price)";
+                var repository = new ServiceRepository();
 
-                insertUserCommand.Parameters.AddWithValue("name", name);
-                insertUserCommand.Parameters.AddWithValue("description", description);
-                insertUserCommand.Parameters.AddWithValue("price", price);
+                var insertQuery = @"
+                        INSERT INTO [dbo].[Services]
+                            ([Name]
+                            ,[Description]
+                            ,[Price])
+                        OUTPUT inserted.*
+                        VALUES
+                            (@name
+		                    ,@description
+		                    ,@price)";
 
-                var reader = insertUserCommand.ExecuteReader();
-
-                if (reader.Read())
+                var parameters = new
                 {
-                    var newService = new Services()
-                    {
-                        Id = (int)reader["id"],
-                        Name = reader["name"].ToString(),
-                        Description = reader["description"].ToString(),
-                        Price = (decimal)reader["price"],
-                    };
+                    Name = name,
+                    Description = description,
+                    Price = price
+                };
 
+                var newService = db.QueryFirstOrDefault<Service>(insertQuery, parameters);
+
+                if (newService != null)
+                {
                     return newService;
                 }
             }
-
             throw new Exception("No Service found");
         }
 
-        public IEnumerable<Services> GetAllServices()
+        public IEnumerable<Service> GetAllServices()
         {
             using (var db = new SqlConnection(ConnectionString))
             {
                 var getQuery = "SELECT * FROM Services";
 
-                var services = db.Query<Services>(getQuery).ToList();
+                var services = db.Query<Service>(getQuery).ToList();
 
                 return services;
-            }
-            //var services = new List<Services>();
-            //var connection = new SqlConnection(ConnectionString);
-            //connection.Open();
-
-            //var getAllUsersCommand = connection.CreateCommand();
-            //getAllUsersCommand.CommandText = "select * from services";
-
-            //var reader = getAllUsersCommand.ExecuteReader(); // Excecute the reader! // if you don't care about the result and just want to know how many things were affected, use the ExecuteNonQuery
-            //                                                 // ExecuteScalar for top left value - 1 column / 1 row
-            //while (reader.Read())
-            //{
-            //    var id = (int)reader["Id"]; //(int) is there to turn it into an int
-            //    var name = reader["name"].ToString();
-            //    var description = reader["description"].ToString();
-            //    var price = (decimal)reader["price"];
-            //    var newService = new Services(id, name, description, price);
-
-            //    services.Add(newService);
-            //}
-
-            //connection.Close(); // Close it down!
-
-            //return services;
+            }          
         }
     }
 }
