@@ -22,14 +22,14 @@ namespace ClinkedIn2.Controllers
         }
 
         [HttpGet]
-        public ActionResult <List<Services>> GetAllServices()
+        public ActionResult <List<Service>> GetAllServices()
         {
             var serviceList = _servicesRepository.GetAllServices();
             return Ok(serviceList);
         }
 
         [HttpPost("{id}/add")]
-        public ActionResult ListService(CreateServiceRequest createRequest)
+        public ActionResult AddService(CreateServiceRequest createRequest)
         {
             var serviceList = _servicesRepository.AddService(createRequest.Name, createRequest.Description, createRequest.Price);
             return Ok(serviceList);

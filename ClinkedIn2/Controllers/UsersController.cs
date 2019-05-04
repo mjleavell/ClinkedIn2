@@ -32,20 +32,20 @@ namespace ClinkedIn2.Controllers
 
         // Get Single User
         [HttpGet("{id}")]
-        public ActionResult GetSingleUser(string id)
+        public ActionResult GetSingleUser(int id)
         {
             return Ok(_userRepository.GetSingleUser(id));
         }
 
         // Add User
-        [HttpPost("register")]
+        [HttpPost]
         public ActionResult AddUser(CreateUserRequest createRequest)
         {
             if (!_validator.Validate(createRequest))
             {
                 return BadRequest(new { error = "users must have a username and password" });
             }
-            var newUser = _userRepository.AddUser(createRequest.Username, createRequest.Password, createRequest.ReleaseDate, createRequest.Age, createRequest.IsPrisoner);
+            var newUser = _userRepository.AddUser(createRequest.Username, createRequest.Password, createRequest.ReleaseDate, createRequest.Age);
 
             return Created($"api/users/{newUser.Id}", newUser);
         }
@@ -54,21 +54,23 @@ namespace ClinkedIn2.Controllers
         [HttpDelete("{id}")]
         public ActionResult DeleteUser(int Id)
         {
-            return Ok(_userRepository.DeleteUser(Id));
+            _userRepository.DeleteUser(Id);
+            return Ok();
         }
 
         // Get Update User IsPrisoner
         [HttpPut("{id}")]
-        public ActionResult UpdateIsPrisoner(string id)
-        {            
-            return Ok(_userRepository.UpdateIsPrisoner(id));
+        public ActionResult UpdateIsPrisoner(int id)
+        {
+            var newIsPrisoner = _userRepository.UpdateIsPrisoner(id);
+            return Ok(newIsPrisoner);
         }
 
         // -------------------------------- Friends --------------------------------
 
         // Add Friend to User
         [HttpPut("{userId}/addFriend/{friendId}")]
-        public ActionResult AddFriend(string userId, string friendId)
+        public ActionResult AddFriend(int userId, int friendId)
         {
             var users = _userRepository.GetAllUsers();
             var user = users.FirstOrDefault(u => u.Id == userId);
@@ -92,7 +94,7 @@ namespace ClinkedIn2.Controllers
 
         // Remove Friend from User
         [HttpPut("{userId}/removeFriend/{friendId}")]
-        public ActionResult RemoveFriend(string userId, string friendId)
+        public ActionResult RemoveFriend(int userId, int friendId)
         {
             var users = _userRepository.GetAllUsers();
             var user = users.FirstOrDefault(u => u.Id == userId);
@@ -111,7 +113,7 @@ namespace ClinkedIn2.Controllers
 
         // GET User's Friends
         [HttpGet("{userId}/friends")]
-        public ActionResult GetFriends(string userId)
+        public ActionResult GetFriends(int userId)
         {
             var user = _userRepository.GetSingleUser(userId);
             if (user.Friends.Count == 0) return BadRequest(new { error = $"{user.Username} doesnt have any friends" });
@@ -122,7 +124,7 @@ namespace ClinkedIn2.Controllers
 
         // GET User's Friends of Friends
         [HttpGet("{userId}/friends/friendsOfFriends")]
-        public ActionResult GetFriendsOfFriends(string userId)
+        public ActionResult GetFriendsOfFriends(int userId)
         {
             var user = _userRepository.GetSingleUser(userId);
             if (user.Friends.Count == 0) return BadRequest(new { error = $"{user.Username} doesnt have any friends" });
@@ -173,7 +175,7 @@ namespace ClinkedIn2.Controllers
 
         // Add Enemy to User //
         [HttpPut("{userId}/addEnemy/{enemyId}")]
-        public ActionResult AddEnemy(string userId, string enemyId)
+        public ActionResult AddEnemy(int userId, int enemyId)
         {
             var users = _userRepository.GetAllUsers();
             var user = users.First(u => u.Id == userId);
@@ -196,7 +198,7 @@ namespace ClinkedIn2.Controllers
 
         // Get enemy of User //
         [HttpGet("{userId}/enemies")]
-        public ActionResult GetEnemies(string userId)
+        public ActionResult GetEnemies(int userId)
         {
             var inmateEnemies = _userRepository.GetSingleUser(userId);
             return Ok(inmateEnemies.Enemies);
@@ -204,7 +206,7 @@ namespace ClinkedIn2.Controllers
 
         // Remove enemy //
         [HttpPut("{userId}/removeEnemy/{enemyId}")]
-        public ActionResult RemoveEnemy(string userId, string enemyId)
+        public ActionResult RemoveEnemy(int userId, int enemyId)
         {
             var users = _userRepository.GetAllUsers();
             var user = users.First(u => u.Id == userId);
@@ -224,7 +226,7 @@ namespace ClinkedIn2.Controllers
         //------------------------ Release Date Calculation ----------------------
         
         [HttpGet("{userId}/release")]
-        public ActionResult GetDaysTilRelease(string userId)
+        public ActionResult GetDaysTilRelease(int userId)
         {
             var inmate = _userRepository.GetSingleUser(userId);
             var daysTilRelease = inmate.ReleaseDate.Subtract(DateTime.Today).Days;
@@ -234,7 +236,7 @@ namespace ClinkedIn2.Controllers
 
         //------------------------ Warden ----------------------
         [HttpGet("warden")]
-        public ActionResult GetAllInmatesForWarden(string userId)
+        public ActionResult GetAllInmatesForWarden(int userId)
         {
             var allUsers = _userRepository.GetAllUsers();
             var inmates = allUsers.Where(user => user.IsWarden == false).Select(user => user.Username);

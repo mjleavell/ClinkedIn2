@@ -1,10 +1,10 @@
 ﻿namespace ClinkedIn2.Models
 {
-    public class Services
+    public class Service
     {
-        public Services() { }
+        public Service() { }
 
-        public Services(int id, string name, string description, decimal price)
+        public Service(int id, string name, string description, decimal price)
         {
             Id = id;
             Name = name;
